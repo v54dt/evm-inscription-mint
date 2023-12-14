@@ -7,10 +7,6 @@ const provider = new ethers.providers.JsonRpcProvider(config.rpcUrl);
 // 创建钱包
 const wallet = new ethers.Wallet(config.privateKey.trim(), provider);
 
-async function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
-
 // 转成16进制
 const convertToHexa = (str = '') =>{
    const res = [];
@@ -53,7 +49,7 @@ async function getGasLimit(hexData, address) {
 
 // 转账交易
 async function sendTransaction(nonce) {
-  const hexData	= convertToHexa(config.tokenJson.trim());
+  const hexData = convertToHexa(config.tokenJson.trim());
   // 获取实时 gasPrice
   const currentGasPrice = await getGasPrice();
   // 在当前 gasPrice 上增加 一定倍数
@@ -66,20 +62,18 @@ async function sendTransaction(nonce) {
   }
   // 获取当前 gasLimit 限制
   const gasLimit = await getGasLimit(hexData, address);
-  // 付费金额
-  const payPrice = config.payPrice
 
   const transaction = {
     to: address,
-	// 替换为你要转账的金额
-    value: ethers.utils.parseEther(payPrice),
+        // 替换为你要转账的金额
+    value: ethers.utils.parseEther("0"),
     // 十六进制数据
     data: hexData,
     // 设置 nonce
     nonce: nonce,
     // 设置 gas 价格
     gasPrice: increasedGasPrice,
-	// 限制gasLimit，根据当前网络转账的设置，不知道设置多少的去区块浏览器看别人转账成功的是多少
+        // 限制gasLimit，根据当前网络转账的设置，不知道设置多少的去区块浏览器看别人转账成功的是多少
     gasLimit: gasLimit,
   };
 
@@ -93,13 +87,15 @@ async function sendTransaction(nonce) {
 
 // 发送多次交易
 async function sendTransactions() {
-  const currentNonce = await getCurrentNonce(wallet);
-  const sleepTime = config.sleepTime
 
-  for (let i = 0; i < config.repeatCount; i++) {
+  for (let i=0;i<config.repeatCount;i++){
+    const currentNonce = await getCurrentNonce(wallet);
     const gasPrice = await getGasPrice();
-    await sendTransaction(currentNonce + i, gasPrice);
-    await sleep(sleepTime)
+
+    await sendTransaction(currentNonce, gasPrice);
+    sleep_time =  Math.floor((Math.random()*120+180)*1000) // 2min ~ 5min
+    console.log(sleep_time)
+    await new Promise(resolve => setTimeout(resolve,t ));
   }
 }
 
